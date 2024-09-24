@@ -4,20 +4,86 @@ import Background from "../../assets/chat.png";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { apiClient } from "@/lib/api-client";
+import { LOGIN_ROUTE, SIGNUP_ROUTE } from "@/utils/constants";
+import { useNavigate } from "react-router-dom";
 
 const Auth = () => {
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
+  const validateSignUp = () => {
+    if (!email.length) {
+      toast.error("Email is required");
+      return false;
+    }
+    if (!password.length) {
+      toast.error("Password is required");
+      return false;
+    }
+    if (password !== confirmPassword) {
+      toast.error("Password and ConfirmPassword should be same");
+      return false;
+    }
+    return true;
+  };
+
+  const validateLogin = () => {
+    if (!email.length) {
+      toast.error("Email is required");
+      return false;
+    }
+    if (!password.length) {
+      toast.error("Password is required");
+      return false;
+    }
+    return true;
+  };
+
   const handleLogin = async () => {
-    try {
-    } catch (error) {}
+    if (validateLogin()) {
+      try {
+        const response = await apiClient.post(
+          LOGIN_ROUTE,
+          { email, password },
+          { withCredentials: true }
+        );
+        toast.success(response.data.message);
+        // console.log(response.data.user);
+        if (response.data.user.id) {
+          if (response.data.user.profileSetup) {
+            navigate("/chat");
+          } else {
+            navigate("/profile");
+          }
+        }
+      } catch (error) {
+        toast.error(error.response.data.message);
+      }
+    }
   };
 
   const handleSignup = async () => {
-    try {
-    } catch (error) {}
+    if (validateSignUp()) {
+      // alert("done");
+      try {
+        const response = await apiClient.post(
+          SIGNUP_ROUTE,
+          { email, password },
+          { withCredentials: true }
+        );
+        toast.success(response.data.message);
+        if (response.status === 201) {
+          navigate("/profile");
+        }
+      } catch (error) {
+        toast.error(error.response.data.message);
+      }
+    }
   };
 
   return (
@@ -34,7 +100,7 @@ const Auth = () => {
             </p>
           </div>
           <div className="flex items-center justify-center w-full ">
-            <Tabs className="w-3/4 ">
+            <Tabs className="w-3/4" defaultValue="login">
               <TabsList className="bg-transparent rounded-none w-full  ">
                 <TabsTrigger
                   value="login"
@@ -66,7 +132,7 @@ const Auth = () => {
                   className="rounded-full p-6"
                   onChange={(e) => setPassword(e.target.value)}
                 />
-                <Button onclick={handleLogin} className="rounded-full p-6">
+                <Button onClick={handleLogin} className="rounded-full p-6">
                   Login
                 </Button>
               </TabsContent>
@@ -93,7 +159,7 @@ const Auth = () => {
                   className="rounded-full p-6"
                   onChange={(e) => setConfirmPassword(e.target.value)}
                 />
-                <Button onclick={handleSignup} className="rounded-full p-6">
+                <Button onClick={handleSignup} className="rounded-full p-6">
                   Signup
                 </Button>
               </TabsContent>
@@ -101,11 +167,10 @@ const Auth = () => {
           </div>
         </div>
         <div className=" hidden xl:flex justify-center items-center ">
-          <img src={Background} alt="login" className="h-[300px] "/>
+          <img src={Background} alt="login" className="h-[300px] " />
         </div>
       </div>
     </div>
-    
   );
 };
 

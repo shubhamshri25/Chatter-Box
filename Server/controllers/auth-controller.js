@@ -1,26 +1,14 @@
 const User = require("../models/user-model");
 
+const maxAge = 7 * 24 * 60 * 60 * 1000;
+
 // register user
-const registerUser = async (req, res) => {
+const signUp = async (req, res) => {
   try {
-    const { username, email, password, avatarImage } = req.body;
+    const { email, password } = req.body;
 
-    // if any field is empty throw error
-    if (!username || !email || !password) {
+    if (!email || !password) {
       return res.status(400).json({ message: "ALL fields are required" });
-    }
-
-    // checking username length
-    if (typeof username !== "string" || username.length < 4) {
-      return res
-        .status(400)
-        .json({ message: "Username length must be greater than 3 " });
-    }
-
-    // checking if the username already exist
-    const userNameExist = await User.findOne({ username });
-    if (userNameExist) {
-      return res.status(400).json({ message: "username already exist" });
     }
 
     // checking if the email already exist
@@ -37,19 +25,27 @@ const registerUser = async (req, res) => {
     }
 
     const createdUser = await User.create({
-      username,
       email,
       password,
-      isAvatarImageSet: !!avatarImage, // set to true if avatarImage is provided
-      avatarImage: avatarImage || "", // save the avatar image if available
+    });
+
+    // generating the jwt token
+    const token = await createdUser.generateToken();
+
+    res.cookie("token", token, {
+      maxAge,
+      secure: true,
+      sameSite: "None",
     });
 
     // console.log(createdUser);
-
     res.status(201).json({
       message: "SignUp successfull",
-      id: createdUser._id.toString(),
-      token: await createdUser.generateToken(),
+      user: {
+        id: createdUser._id.toString(),
+        email: createdUser.email,
+        profileSetup: createdUser.profileSetup,
+      },
     });
   } catch (error) {
     console.error(error);
@@ -67,19 +63,39 @@ const loginUser = async (req, res) => {
       return res.status(400).json({ message: "All field are required" });
     }
 
-    const existingUser = await User.findOne({ email });
+    const user = await User.findOne({ email });
 
-    if (!existingUser) {
-      return res.status(400).json({ message: "Invalid credtials" });
+    if (!user) {
+      return res.status(400).json({ message: "User with given email not found " });
     }
 
-    const isPasswordMatch = await existingUser.comparePassword(password);
+    const isPasswordMatch = await user.comparePassword(password);
+
+    if (!isPasswordMatch) {
+      return res.status(400).json({ message: "Password is incorrect  " });
+    }
+
+    // generating the jwt token
+    const token = await user.generateToken();
+
+    res.cookie("token", token, {
+      maxAge,
+      secure: true,
+      sameSite: "None",
+    });
 
     if (isPasswordMatch) {
       res.status(200).json({
         message: "Login successfull",
-        id: existingUser._id.toString(),
-        token: await existingUser.generateToken(),
+        user: {
+          id: user._id.toString(),
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          image: user.image,
+          color: user.color,
+          profileSetup: user.profileSetup,
+        },
       });
     } else {
       return res.status(400).json({ message: "Invalid credtials" });
@@ -90,4 +106,4 @@ const loginUser = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, loginUser };
+module.exports = { signUp, loginUser };

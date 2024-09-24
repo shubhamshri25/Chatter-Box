@@ -3,10 +3,11 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 const userSchema = new mongoose.Schema({
-  username: {
+  firstName: {
     type: String,
-    required: true,
-    unique: true,
+  },
+  lastName: {
+    type: String,
   },
   email: {
     type: String,
@@ -17,13 +18,16 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  isAvatarImageSet: {
-    type: Boolean,
-    default: false,
-  },
-  avatarImage: {
+  image: {
     type: String,
     default: "",
+  },
+  color: {
+    type: Number,
+  },
+  profileSetup: {
+    type: Boolean,
+    default: false,
   },
 });
 

@@ -4,13 +4,21 @@ const app = express();
 const port = process.env.PORT || 3000;
 const cors = require("cors");
 const connectDb = require("./connection");
+const cookieParser = require("cookie-parser");
+
+app.use(cookieParser());
 
 app.use(express.json());
 
-app.use(cors());
+app.use(
+  cors({
+    origin: [process.env.ORIGIN || "http://localhost:5173"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    credentials: true,
+  })
+);
 
-
-const userRoutes = require("./routes/user-route");
+const userRoutes = require("./routes/auth-route");
 
 app.use("/api/auth", userRoutes);
 
