@@ -8,14 +8,18 @@ import { toast } from "sonner";
 import { apiClient } from "@/lib/api-client";
 import { LOGIN_ROUTE, SIGNUP_ROUTE } from "@/utils/constants";
 import { useNavigate } from "react-router-dom";
+import { useAppStore } from "@/store";
 
 const Auth = () => {
   const navigate = useNavigate();
+
+  const { setUserInfo } = useAppStore();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
+  // validating the signUp
   const validateSignUp = () => {
     if (!email.length) {
       toast.error("Email is required");
@@ -32,6 +36,7 @@ const Auth = () => {
     return true;
   };
 
+  // validating the login
   const validateLogin = () => {
     if (!email.length) {
       toast.error("Email is required");
@@ -44,6 +49,7 @@ const Auth = () => {
     return true;
   };
 
+  //  login functionality
   const handleLogin = async () => {
     if (validateLogin()) {
       try {
@@ -53,8 +59,9 @@ const Auth = () => {
           { withCredentials: true }
         );
         toast.success(response.data.message);
-        // console.log(response.data.user);
+        console.log(response.data.user);
         if (response.data.user.id) {
+          setUserInfo(response.data.user);
           if (response.data.user.profileSetup) {
             navigate("/chat");
           } else {
@@ -62,11 +69,13 @@ const Auth = () => {
           }
         }
       } catch (error) {
-        toast.error(error.response.data.message);
+        console.error(error);
+        toast.error(error.response?.data?.message);
       }
     }
   };
 
+  // signUp functionality
   const handleSignup = async () => {
     if (validateSignUp()) {
       // alert("done");
@@ -77,11 +86,12 @@ const Auth = () => {
           { withCredentials: true }
         );
         toast.success(response.data.message);
+        setUserInfo(response.data.user);
         if (response.status === 201) {
           navigate("/profile");
         }
       } catch (error) {
-        toast.error(error.response.data.message);
+        toast.error(error.response?.data?.message);
       }
     }
   };

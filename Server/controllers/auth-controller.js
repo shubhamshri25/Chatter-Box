@@ -3,7 +3,7 @@ const User = require("../models/user-model");
 const maxAge = 7 * 24 * 60 * 60 * 1000;
 
 // register user
-const signUp = async (req, res) => {
+const signUp = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
@@ -32,7 +32,7 @@ const signUp = async (req, res) => {
     // generating the jwt token
     const token = await createdUser.generateToken();
 
-    res.cookie("token", token, {
+    res.cookie("jwt", token, {
       maxAge,
       secure: true,
       sameSite: "None",
@@ -54,19 +54,21 @@ const signUp = async (req, res) => {
 };
 
 // logging the user
-const loginUser = async (req, res) => {
+const loginUser = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
     // Check if both email and password are provided
     if (!email || !password) {
-      return res.status(400).json({ message: "All field are required" });
+      return res.status(400).json({ message: "All fields are required" });
     }
 
     const user = await User.findOne({ email });
 
     if (!user) {
-      return res.status(400).json({ message: "User with given email not found " });
+      return res
+        .status(400)
+        .json({ message: "User with given email not found " });
     }
 
     const isPasswordMatch = await user.comparePassword(password);
@@ -78,7 +80,7 @@ const loginUser = async (req, res) => {
     // generating the jwt token
     const token = await user.generateToken();
 
-    res.cookie("token", token, {
+    res.cookie("jwt", token, {
       maxAge,
       secure: true,
       sameSite: "None",
@@ -106,4 +108,31 @@ const loginUser = async (req, res) => {
   }
 };
 
-module.exports = { signUp, loginUser };
+// get user info
+const getUserInfo = async (req, res, next) => {
+  try {
+    // console.log(req.userId);
+
+    const userData = await User.findById(req.userId);
+    if (!userData) {
+      res.status(400).json({ message: "User with given id not found " });
+    }
+
+    return res.status(200).json({
+      user: {
+        id: userData._id.toString(),
+        email: userData.email,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        image: userData.image,
+        color: userData.color,
+        profileSetup: userData.profileSetup,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+module.exports = { signUp, loginUser, getUserInfo };
