@@ -8,12 +8,14 @@ import { useEffect, useState } from "react";
 import { apiClient } from "./lib/api-client";
 import { GET_USER_INFO } from "./utils/constants";
 
+// navigate to auth if  user is not logged in
 const PrivateRoute = ({ children }) => {
   const { userInfo } = useAppStore();
   const isAuthenticated = !!userInfo;
   return isAuthenticated ? children : <Navigate to="/auth" />;
 };
 
+// allow the user to view routes if is logged in
 const AuthRoute = ({ children }) => {
   const { userInfo } = useAppStore();
   const isAuthenticated = !!userInfo;
@@ -24,14 +26,23 @@ function App() {
   const { userInfo, setUserInfo } = useAppStore();
   const [loading, setLoading] = useState(true);
 
+  // getting the user data 
   const getUserData = async () => {
     try {
       const response = await apiClient.get(GET_USER_INFO, {
         withCredentials: true,
       });
-      console.log(response.data.user);
+      if (response.status === 200 && response.data.id) {
+        setUserInfo(response.data);
+      } else {
+        setUserInfo(undefined);
+      }
+      // console.log(response.data);
     } catch (error) {
       console.log(error);
+      setUserInfo(undefined);
+    } finally {
+      setLoading(false);
     }
   };
 

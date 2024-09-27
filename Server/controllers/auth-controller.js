@@ -3,7 +3,7 @@ const User = require("../models/user-model");
 const maxAge = 7 * 24 * 60 * 60 * 1000;
 
 // register user
-const signUp = async (req, res, next) => {
+const signUp = async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -54,7 +54,7 @@ const signUp = async (req, res, next) => {
 };
 
 // logging the user
-const loginUser = async (req, res, next) => {
+const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -109,7 +109,7 @@ const loginUser = async (req, res, next) => {
 };
 
 // get user info
-const getUserInfo = async (req, res, next) => {
+const getUserInfo = async (req, res) => {
   try {
     // console.log(req.userId);
 
@@ -119,15 +119,13 @@ const getUserInfo = async (req, res, next) => {
     }
 
     return res.status(200).json({
-      user: {
-        id: userData._id.toString(),
-        email: userData.email,
-        firstName: userData.firstName,
-        lastName: userData.lastName,
-        image: userData.image,
-        color: userData.color,
-        profileSetup: userData.profileSetup,
-      },
+      id: userData._id.toString(),
+      email: userData.email,
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      image: userData.image,
+      color: userData.color,
+      profileSetup: userData.profileSetup,
     });
   } catch (error) {
     console.error(error);
@@ -135,4 +133,43 @@ const getUserInfo = async (req, res, next) => {
   }
 };
 
-module.exports = { signUp, loginUser, getUserInfo };
+// save changes to data base
+const updateProfile = async (req, res) => {
+  try {
+    const userId = req.userId;
+    if (!userId) {
+      res.status(400).json({ message: "User with given id not found " });
+    }
+
+    const { firstName, lastName, color } = req.body;
+    if (!firstName || !lastName) {
+      res.status(400).json({ message: "firstName and lastName is required" });
+    }
+
+    const userData = await User.findByIdAndUpdate(
+      userId,
+      {
+        firstName,
+        lastName,
+        color,
+        profileSetup: true,
+      },
+      { new: true, runValidators: true }
+    );
+
+    return res.status(200).json({
+      id: userData._id.toString(),
+      email: userData.email,
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      image: userData.image,
+      color: userData.color,
+      profileSetup: userData.profileSetup,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+module.exports = { signUp, loginUser, getUserInfo, updateProfile };

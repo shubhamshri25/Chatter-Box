@@ -14,8 +14,7 @@ const verifyJwtToken = (req, res, next) => {
 
     // Store the user ID in the request object for future use
     req.userId = payload.userId;
-
-    // Proceed to the next middleware or route handler
+    
     next();
   });
 };
