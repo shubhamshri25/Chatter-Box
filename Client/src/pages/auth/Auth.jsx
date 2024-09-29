@@ -10,7 +10,7 @@ import { LOGIN_ROUTE, SIGNUP_ROUTE } from "@/utils/constants";
 import { useNavigate } from "react-router-dom";
 import { useAppStore } from "@/store";
 
-const Auth = () => {
+const Auth = () => { 
   const navigate = useNavigate();
 
   const { setUserInfo } = useAppStore();

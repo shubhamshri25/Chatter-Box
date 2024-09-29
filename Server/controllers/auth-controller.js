@@ -1,5 +1,5 @@
 const User = require("../models/user-model");
-
+const fs = require("fs");
 const maxAge = 7 * 24 * 60 * 60 * 1000;
 
 // register user
@@ -172,4 +172,76 @@ const updateProfile = async (req, res) => {
   }
 };
 
-module.exports = { signUp, loginUser, getUserInfo, updateProfile };
+// add or update the profile image
+const addProfileImage = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: "File is required" });
+    }
+
+    const currDate = Date.now();
+    let fileName = "uploads/profiles/" + currDate + req.file.originalname;
+    fs.renameSync(req.file.path, fileName);
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.userId,
+      { image: fileName },
+      { new: true, runValidators: true }
+    );
+
+    return res.status(200).json({
+      image: updatedUser.image,
+    });
+  } catch (error) {
+    console.log("profile image error", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// delete the profile image
+const deleteImage = async () => {
+  try {
+    const userId = req.userId;
+    if (!userId) {
+      res.status(400).json({ message: "User with given id not found " });
+    }
+
+    const { firstName, lastName, color } = req.body;
+    if (!firstName || !lastName) {
+      res.status(400).json({ message: "firstName and lastName is required" });
+    }
+
+    const userData = await User.findByIdAndUpdate(
+      userId,
+      {
+        firstName,
+        lastName,
+        color,
+        profileSetup: true,
+      },
+      { new: true, runValidators: true }
+    );
+
+    return res.status(200).json({
+      id: userData._id.toString(),
+      email: userData.email,
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      image: userData.image,
+      color: userData.color,
+      profileSetup: userData.profileSetup,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+module.exports = {
+  signUp,
+  loginUser,
+  getUserInfo,
+  updateProfile,
+  addProfileImage,
+  deleteImage,
+};

@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { apiClient } from "@/lib/api-client";
-import { UPDATE_PROFILE } from "@/utils/constants";
+import { ADD_PROFILE_IMAGE, UPDATE_PROFILE } from "@/utils/constants";
 
 const Profile = () => {
   const { userInfo, setUserInfo } = useAppStore();
@@ -81,7 +81,26 @@ const Profile = () => {
     }
   };
 
-  const handelImageChange = async (e) => {};
+  // Handles image file change and uploads the image
+  const handelImageChange = async (e) => {
+    const file = e.target.files[0];
+    // console.log({ file });
+    if (file) {
+      const formData = new FormData();
+      formData.append("profile-image", file);
+
+      const response = await apiClient.post(ADD_PROFILE_IMAGE, formData, {
+        withCredentials: true,
+      });
+
+      // console.log(response.data);
+
+      if (response.status === 200 && response.data.image) {
+        setUserInfo({ ...userInfo, image: response.data.image });
+        toast.success("Image updated successfully");
+      }
+    }
+  };
 
   // adding the image
   const handelFileInputClick = () => {
@@ -143,7 +162,7 @@ const Profile = () => {
                 className="hidden"
                 onChange={handelImageChange}
                 name="profile-image"
-                accept=".png, .jpj, .svg, .jpeg, .webp"
+                accept=".png, .jpg .svg, .jpeg, .webp"
               />
             </div>
             <div className="flex min-w-32 md:min-w-64 flex-col gap-5 text-white items-center justify-center">

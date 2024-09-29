@@ -6,10 +6,6 @@ const cors = require("cors");
 const connectDb = require("./connection");
 const cookieParser = require("cookie-parser");
 
-app.use(cookieParser());
-
-app.use(express.json());
-
 app.use(
   cors({
     origin: [process.env.ORIGIN || "http://localhost:5173"],
@@ -17,6 +13,12 @@ app.use(
     credentials: true,
   })
 );
+
+app.use("/uploads/profiles", express.static("uploads/profiles"));
+
+
+app.use(cookieParser());
+app.use(express.json());
 
 const userRoutes = require("./routes/auth-route");
 
