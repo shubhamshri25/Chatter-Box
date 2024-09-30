@@ -119,7 +119,7 @@ const getUserInfo = async (req, res) => {
     }
 
     return res.status(200).json({
-      id: userData._id.toString(),
+      id: userData._id,
       email: userData.email,
       firstName: userData.firstName,
       lastName: userData.lastName,
@@ -158,7 +158,7 @@ const updateProfile = async (req, res) => {
     );
 
     return res.status(200).json({
-      id: userData._id.toString(),
+      id: userData.userId,
       email: userData.email,
       firstName: userData.firstName,
       lastName: userData.lastName,
@@ -199,38 +199,27 @@ const addProfileImage = async (req, res) => {
 };
 
 // delete the profile image
-const deleteImage = async () => {
+const deleteImage = async (req, res) => {
   try {
     const userId = req.userId;
-    if (!userId) {
-      res.status(400).json({ message: "User with given id not found " });
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ message: "User with the given id not found " });
     }
 
-    const { firstName, lastName, color } = req.body;
-    if (!firstName || !lastName) {
-      res.status(400).json({ message: "firstName and lastName is required" });
+    if (user.image) {
+      fs.unlinkSync(user.image);
     }
 
-    const userData = await User.findByIdAndUpdate(
-      userId,
-      {
-        firstName,
-        lastName,
-        color,
-        profileSetup: true,
-      },
-      { new: true, runValidators: true }
-    );
+    user.image = null;
+    await user.save();
 
-    return res.status(200).json({
-      id: userData._id.toString(),
-      email: userData.email,
-      firstName: userData.firstName,
-      lastName: userData.lastName,
-      image: userData.image,
-      color: userData.color,
-      profileSetup: userData.profileSetup,
-    });
+    return res
+      .status(200)
+      .json({ message: "Profile image removed successfully" });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "Internal server error" });

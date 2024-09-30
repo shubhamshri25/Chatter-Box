@@ -9,7 +9,12 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { apiClient } from "@/lib/api-client";
-import { ADD_PROFILE_IMAGE, UPDATE_PROFILE } from "@/utils/constants";
+import {
+  ADD_PROFILE_IMAGE,
+  DELETE_PROFILE_IMAGE,
+  HOST,
+  UPDATE_PROFILE,
+} from "@/utils/constants";
 
 const Profile = () => {
   const { userInfo, setUserInfo } = useAppStore();
@@ -28,6 +33,9 @@ const Profile = () => {
       setFirstName(userInfo.firstName);
       setLastName(userInfo.lastName);
       setSelectedColor(userInfo.color);
+    }
+    if (userInfo.image) {
+      setImage(`${HOST}/${userInfo.image}`);
     }
   }, [userInfo]);
 
@@ -59,7 +67,7 @@ const Profile = () => {
         );
 
         if (response.status === 200 && response.data) {
-          setUserInfo(response.data);
+          setUserInfo({ ...response.data, profileSetup: true });
           toast.success("Profile updated successfully");
           navigate("/chat");
         } else {
@@ -107,7 +115,22 @@ const Profile = () => {
     fileInputRef.current.click();
   };
 
-  const deleteImage = async () => {};
+  const deleteImage = async () => {
+    try {
+      const response = await apiClient.delete(DELETE_PROFILE_IMAGE, {
+        withCredentials: true,
+      });
+
+      if (response.status === 200) {
+        setUserInfo({ ...userInfo, image: null });
+        toast.success("Image removed successfully");
+        setImage(null);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.response.data.message);
+    }
+  };
 
   return (
     <>
@@ -130,7 +153,7 @@ const Profile = () => {
                   <AvatarImage
                     src={image}
                     alt="profile"
-                    className="object-cover w-full h-full bg-black "
+                    className="object-cover w-full h-full bg-black"
                   />
                 ) : (
                   <div
@@ -162,7 +185,7 @@ const Profile = () => {
                 className="hidden"
                 onChange={handelImageChange}
                 name="profile-image"
-                accept=".png, .jpg .svg, .jpeg, .webp"
+                accept=".png, .jpg, .svg, .jpeg, .webp"
               />
             </div>
             <div className="flex min-w-32 md:min-w-64 flex-col gap-5 text-white items-center justify-center">

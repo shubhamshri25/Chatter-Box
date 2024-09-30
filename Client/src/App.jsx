@@ -26,7 +26,7 @@ function App() {
   const { userInfo, setUserInfo } = useAppStore();
   const [loading, setLoading] = useState(true);
 
-  // getting the user data 
+  // getting the user data
   const getUserData = async () => {
     try {
       const response = await apiClient.get(GET_USER_INFO, {
