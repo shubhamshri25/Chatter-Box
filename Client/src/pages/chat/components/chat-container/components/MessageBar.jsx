@@ -10,6 +10,7 @@ const MessageBar = () => {
   const [message, setMessage] = useState("");
   const [EmojiPickerOpen, setEmojiPickerOpen] = useState(false);
 
+  // closing the emoji picker when clicking anywhere outside 
   useEffect(() => {
     function handleEmojiClickOutside(event) {
       if (emojiRef.current && !emojiRef.current.contains(event.target)) {
