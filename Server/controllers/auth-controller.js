@@ -112,7 +112,7 @@ const loginUser = async (req, res) => {
 const logOut = async (req, res) => {
   try {
     res.cookie("jwt", "", { maxAge: 1, secure: true, sameSite: "None" });
-    res.status(200).json({ message: "logOut successfully" });
+    res.status(200).json({ message: "logout successfully" });
   } catch (error) {
     console.error("Logout error : ", error);
     return res.status(500).json({ message: "Internal server error" });
