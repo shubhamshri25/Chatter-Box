@@ -1,7 +1,7 @@
 import React from "react";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { useAppStore } from "@/store";
-import { HOST } from "@/utils/constants";
+import { HOST, LOGOUT_ROUTE } from "@/utils/constants";
 import { getColor } from "@/lib/utils";
 import {
   Tooltip,
@@ -12,14 +12,31 @@ import {
 import { FiEdit2 } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { IoLogOut } from "react-icons/io5";
+import { apiClient } from "@/lib/api-client";
+import { toast } from "sonner";
 
 const ProfileInfo = () => {
-  const { userInfo } = useAppStore();
+  const { userInfo, setUserInfo } = useAppStore();
 
   const navigate = useNavigate();
 
+  // logging out the user
   const logOut = async () => {
-
+    try {
+      const response = await apiClient.post(
+        LOGOUT_ROUTE,
+        {},
+        { withCredentials: true }
+      );
+      if (response.status === 200) {
+        setUserInfo(null);
+        toast.success(response.data.message);
+        navigate("/auth");
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.response.data.message);
+    }
   };
 
   return (

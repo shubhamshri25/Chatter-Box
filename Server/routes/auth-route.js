@@ -7,16 +7,18 @@ const {
   updateProfile,
   addProfileImage,
   deleteImage,
+  logOut,
 } = require("../controllers/auth-controller");
 const verifyJwtToken = require("../middlewares/auth-middleware");
 const multer = require("multer");
 
 const upload = multer({ dest: "uploads/profiles" });
 
-
 router.post("/signup", signUp);
 
 router.post("/login", loginUser);
+
+router.post("/logout", logOut);
 
 router.get("/user-info", verifyJwtToken, getUserInfo);
 

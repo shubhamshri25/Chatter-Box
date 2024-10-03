@@ -20,7 +20,7 @@ const Profile = () => {
   const { userInfo, setUserInfo } = useAppStore();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [image, setImage] = useState(null);
+  const [image, setImage] = useState("");
   const [hovered, setHovered] = useState(false);
   const [selectedColor, setSelectedColor] = useState(0);
 
@@ -148,7 +148,7 @@ const Profile = () => {
               onMouseEnter={() => setHovered(true)}
               onMouseLeave={() => setHovered(false)}
             >
-              <Avatar className="h-32 w-32 md:w-48 md:h-48 rounded-full overflow-hidden ">
+              <Avatar className="h-32 w-32 md:w-48 md:h-48 rounded-full ">
                 {image ? (
                   <AvatarImage
                     src={image}
