@@ -16,13 +16,14 @@ app.use(
 
 app.use("/uploads/profiles", express.static("uploads/profiles"));
 
-
 app.use(cookieParser());
 app.use(express.json());
 
 const userRoutes = require("./routes/auth-route");
+const contactRoutes = require("./routes/contact-route");
 
 app.use("/api/auth", userRoutes);
+app.use("/api/contacts", contactRoutes);
 
 app.get("/", (req, res) => res.send("Hello from chat-app backend"));
 
