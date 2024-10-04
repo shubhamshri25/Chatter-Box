@@ -1,10 +1,10 @@
 const User = require("../models/user-model");
 
-const searchContacts  = async (req, res) => {
+const searchContacts = async (req, res) => {
   try {
     const { searchTerm } = req.body;
 
-    if (!searchTerm || searchTerm === undefined) {
+    if (searchTerm === null || searchTerm === undefined) {
       return res.status(400).json({ message: "Searchterm is required  " });
     }
 
@@ -31,4 +31,4 @@ const searchContacts  = async (req, res) => {
   }
 };
 
-module.exports = { searchContacts  };
+module.exports = { searchContacts };
