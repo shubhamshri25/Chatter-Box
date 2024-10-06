@@ -7,6 +7,7 @@ import { useAppStore } from "./store";
 import { useEffect, useState } from "react";
 import { apiClient } from "./lib/api-client";
 import { GET_USER_INFO } from "./utils/constants";
+import { io } from "socket.io-client";
 
 // navigate to auth if  user is not logged in
 const PrivateRoute = ({ children }) => {
