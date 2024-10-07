@@ -10,7 +10,7 @@ import { LOGIN_ROUTE, SIGNUP_ROUTE } from "@/utils/constants";
 import { useNavigate } from "react-router-dom";
 import { useAppStore } from "@/store";
 
-const Auth = () => { 
+const Auth = () => {
   const navigate = useNavigate();
 
   const { setUserInfo } = useAppStore();
@@ -59,7 +59,7 @@ const Auth = () => {
           { withCredentials: true }
         );
         toast.success(response.data.message);
-        console.log(response.data.user);
+        // console.log(response.data.user);
         if (response.data.user.id) {
           setUserInfo(response.data.user);
           if (response.data.user.profileSetup) {
